@@ -1,3 +1,3 @@
 # Laravel Grid Component
 
-### Base component to build grids(tables) with Datatables jquery plugin or other
+### Base component to build grids(tables) with filtering and sorting for JS Datatables jQuery plugin.

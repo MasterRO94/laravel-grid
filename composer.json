@@ -1,6 +1,6 @@
 {
 	"name": "masterro/laravel-grid",
-	"description": "Base component to build grids(tables) with filtering and ordering for JS Datatables jQuery plugin.",
+	"description": "Base component to build grids(tables) with filtering and sorting for JS Datatables jQuery plugin.",
 	"require": {
 		"laravel/framework": "^5.5"
 	},
