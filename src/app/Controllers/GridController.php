@@ -5,24 +5,19 @@ declare(strict_types=1);
 namespace MasterRO\Grid\Controllers;
 
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Collection;
+use MasterRO\Grid\Core\Factory;
 
 class GridController extends Controller
 {
 	/**
 	 * @param $grid
 	 *
-	 * @return mixed
-	 * @throws \Illuminate\Container\EntryNotFoundException
+	 * @return Collection
+	 * @throws \Throwable
 	 */
 	public function items($grid)
 	{
-		$pieces = explode('.', $grid);
-		$grid = implode('\\', array_map('studly_case', $pieces));
-
-		$gridClass = config('grid.namespace') . "\\{$grid}";
-
-		abort_unless(class_exists($gridClass), 404);
-
-		return app($gridClass)->get();
+		return Factory::make($grid)->get();
 	}
 }
