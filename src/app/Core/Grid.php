@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MasterRO\Grid\Core;
 
+use Illuminate\Database\Eloquent\Builder;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
 use MasterRO\Grid\GridProviders\DataTablesProvider;
@@ -81,6 +82,57 @@ abstract class Grid
 
 
 	/**
+	 * @param $index
+	 *
+	 * @return mixed
+	 */
+	public static function column($index)
+	{
+		$index = $index ?? -1;
+
+		return array_get(static::columns(), $index);
+	}
+
+
+	/**
+	 * @param Collection $items
+	 *
+	 * @return Collection
+	 */
+	public function transform(Collection $items): Collection
+	{
+		return $items;
+	}
+
+
+	/**
+	 * @param bool $withFilters
+	 *
+	 * @return EloquentBuilder
+	 */
+	public function getQuery($withFilters = true): Builder
+	{
+		return $withFilters
+			? $this->applyFilters()->orderBy()->query
+			: $this->query;
+	}
+
+
+	/**
+	 * @return Collection
+	 * @throws \Throwable
+	 */
+	public function get(): Collection
+	{
+		return $this->transform(
+			$this->provider()->results(
+				$this->getQuery()
+			)
+		);
+	}
+
+
+	/**
 	 * Add query filters
 	 *
 	 * @return Grid
@@ -101,42 +153,6 @@ abstract class Grid
 		$this->query->orderBy("{$this->tableName}.{$this->orderColumn}", $this->orderDirection);
 
 		return $this;
-	}
-
-
-	/**
-	 * @param Collection $items
-	 *
-	 * @return Collection
-	 */
-	public function transform(Collection $items): Collection
-	{
-		return $items;
-	}
-
-
-	/**
-	 * @return Collection
-	 * @throws \Throwable
-	 */
-	public function get(): Collection
-	{
-		return $this->transform($this->provider()->results(
-			$this->applyFilters()->orderBy()->query
-		));
-	}
-
-
-	/**
-	 * @param $index
-	 *
-	 * @return mixed
-	 */
-	public static function column($index)
-	{
-		$index = $index ?? -1;
-
-		return array_get(static::columns(), $index);
 	}
 
 
