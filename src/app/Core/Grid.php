@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace MasterRO\Grid\Core;
 
-use Illuminate\Database\Eloquent\Builder;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
-use MasterRO\Grid\GridProviders\DataTablesProvider;
 use MasterRO\Grid\GridProviders\Provider;
+use MasterRO\Grid\GridProviders\DataTablesProvider;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
@@ -20,7 +20,7 @@ abstract class Grid
 	protected $provider;
 
 	/**
-	 * @var QueryBuilder|EloquentBuilder
+	 * @var QueryBuilder|EloquentBuilder|Relation
 	 */
 	protected $query;
 
@@ -58,7 +58,7 @@ abstract class Grid
 	/**
 	 * Grid constructor.
 	 *
-	 * @param QueryBuilder|EloquentBuilder|null $query
+	 * @param QueryBuilder|EloquentBuilder|Relation|null $query
 	 * @param iterable $requestData
 	 *
 	 * @throws \Throwable
@@ -108,9 +108,9 @@ abstract class Grid
 	/**
 	 * @param bool $withFilters
 	 *
-	 * @return EloquentBuilder
+	 * @return QueryBuilder|EloquentBuilder|Relation
 	 */
-	public function getQuery($withFilters = true): Builder
+	public function getQuery($withFilters = true)
 	{
 		return $withFilters
 			? $this->applyFilters()->orderBy()->query
