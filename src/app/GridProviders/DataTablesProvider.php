@@ -46,5 +46,5 @@ class DataTablesProvider extends Provider
 			'recordsFiltered' => $count,
 			'data'            => $data,
 		]);
-	} //Fix datatables length '-1'
+	}
 }
