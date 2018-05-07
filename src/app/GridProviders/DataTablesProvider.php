@@ -33,7 +33,11 @@ class DataTablesProvider extends Provider
 	{
 		$count = $query->count();
 		$data = $query->skip($this->requestData->get('start', 0))
-			->take($this->requestData->get('length', 10))
+			->when(
+				($length = $this->requestData->get('length', 10)) > 0,
+				function ($query) use ($length) {
+					return $query->take($this->requestData->get('length', 10));
+				})
 			->get();
 
 		return collect([
