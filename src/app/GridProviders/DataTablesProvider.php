@@ -32,12 +32,13 @@ class DataTablesProvider extends Provider
 	public function results($query): Collection
 	{
 		$count = $query->count();
+		$skip = $this->requestData->get('start', 0);
+		$length = $this->requestData->get('length', 10);
+
 		$data = $query->skip($this->requestData->get('start', 0))
-			->when(
-				($length = $this->requestData->get('length', 10)) > 0,
-				function ($query) use ($length) {
-					return $query->take($this->requestData->get('length', 10));
-				})
+			->when($length > 0, function ($query) use ($skip, $length) {
+				return $query->skip($skip)->take($length);
+			})
 			->get();
 
 		return collect([
@@ -45,5 +46,5 @@ class DataTablesProvider extends Provider
 			'recordsFiltered' => $count,
 			'data'            => $data,
 		]);
-	}
+	} //Fix datatables length '-1'
 }
