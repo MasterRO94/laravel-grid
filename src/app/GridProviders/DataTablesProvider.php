@@ -35,7 +35,7 @@ class DataTablesProvider extends Provider
 		$skip = $this->requestData->get('start', 0);
 		$length = $this->requestData->get('length', 10);
 
-		$data = $query->skip($this->requestData->get('start', 0))
+		$data = $query
 			->when($length > 0, function ($query) use ($skip, $length) {
 				return $query->skip($skip)->take($length);
 			})
