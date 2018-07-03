@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MasterRO\Grid\Core;
 
+use Illuminate\Support\Str;
+
 class Factory
 {
 	/**
@@ -13,10 +15,15 @@ class Factory
 	 */
 	public static function make(string $grid): Grid
 	{
+		if (Str::startsWith($grid, '.')) {
+			$grid = ltrim($grid, '.');
+			$namespace = '';
+		}
+
 		$pieces = explode('.', $grid);
 		$grid = implode('\\', array_map('studly_case', $pieces));
 
-		$gridClass = config('grid.namespace') . "\\{$grid}";
+		$gridClass = (isset($namespace) ? $namespace : config('grid.namespace')) . "\\{$grid}";
 
 		abort_unless(class_exists($gridClass), 404);
 

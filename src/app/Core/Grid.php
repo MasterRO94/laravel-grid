@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MasterRO\Grid\Core;
 
+use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
 use MasterRO\Grid\GridProviders\Provider;
@@ -54,6 +56,16 @@ abstract class Grid
 	 */
 	private $resolvedProvider;
 
+	/**
+	 * Iterable Provider Keys
+	 * Needed for transformation
+	 *
+	 * @var array
+	 */
+	protected $iterableProviderKeys = [
+		DataTablesProvider::class => 'data',
+	];
+
 
 	/**
 	 * Grid constructor.
@@ -101,6 +113,25 @@ abstract class Grid
 	 */
 	public function transform(Collection $items): Collection
 	{
+		if ($providerDataKey = Arr::get($this->iterableProviderKeys, $this->provider)) {
+			$entities = $items->get($providerDataKey);
+
+			return $items->put($providerDataKey, $entities->map(function ($entity) {
+				$columns = [];
+				foreach (static::columns() as $column) {
+					if (method_exists($this, $method = camel_case($column) . 'Column')) {
+						$columns[] = call_user_func([$this, $method], $entity);
+					} elseif ($entity->{$column} && $entity->{$column} instanceof Carbon) {
+						$columns[] = $entity->{$column}->toFormattedDateString();
+					} else {
+						$columns[] = $entity->{$column};
+					}
+				}
+
+				return $columns;
+			})->values());
+		}
+
 		return $items;
 	}
 
