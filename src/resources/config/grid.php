@@ -12,5 +12,4 @@ return [
 
 	// Middleware for built in route
 	'middleware' => ['web'],
-
 ];

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MasterRO\Grid\GridProviders;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -16,9 +17,9 @@ class DataTablesProvider extends Provider
 	{
 		$requestData = $this->requestData->all();
 
-		$search = array_get($requestData, 'search.value');
-		$orderColumn = array_get($requestData, 'order.0.column');
-		$orderDirection = array_get($requestData, 'order.0.dir');
+		$search = Arr::get($requestData, 'search.value');
+		$orderColumn = Arr::get($requestData, 'order.0.column');
+		$orderDirection = Arr::get($requestData, 'order.0.dir');
 
 		return compact('search', 'orderColumn', 'orderDirection');
 	}
