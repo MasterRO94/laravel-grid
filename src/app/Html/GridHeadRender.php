@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace LenderKit\Admin\Services\Builders;
+namespace MasterRO\Grid\Html;
 
-use LenderKit\Admin\Grids\BaseGrid;
 use Illuminate\Contracts\View\Factory;
+use MasterRO\Grid\Core\Factory as GridFactory;
 
 /**
  * Class GridHeadRender

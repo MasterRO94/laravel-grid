@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MasterRO\Grid\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use LenderKit\Admin\Services\Builders\GridHeadRender;
+use MasterRO\Grid\Html\GridHeadRender;
 
 /**
  * Class HeadBuilderFacade

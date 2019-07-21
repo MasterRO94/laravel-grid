@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace MasterRO\Grid\Core;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
+use MasterRO\Grid\Builders\Column;
 use MasterRO\Grid\GridProviders\Provider;
 use MasterRO\Grid\GridProviders\DataTablesProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -130,7 +130,7 @@ abstract class Grid
 	/**
 	 * Get Extenders
 	 *
-	 * @return Collection|ResourceExtender[]
+	 * @return Collection|GridExtender[]
 	 */
 	public function getExtenders(): Collection
 	{
@@ -150,7 +150,7 @@ abstract class Grid
 	 */
 	public function columns(): array
 	{
-		return $this->columns->toArray();
+		return $this->columns ? $this->columns->toArray() : [];
 	}
 
 
@@ -184,7 +184,7 @@ abstract class Grid
 	protected function removeColumnsByExtender(): void
 	{
 		$this->getExtenders()->map(function (GridExtender $extender) {
-			foreach ($extender::removeColumns() as $column) {
+			foreach ($extender->removeColumns() as $column) {
 				/* @var Column $column */
 				$this->columns = $this->columns->filter(function (Column $item, $key) use ($column) {
 					return $item->name != $column->name;
@@ -193,22 +193,6 @@ abstract class Grid
 		});
 
 		$this->columns = $this->columns->values();
-
-
-//		if (! isset(static::$extenders[static::class])) {
-//			return;
-//		}
-//
-//		foreach (static::$extenders[static::class] as $extender) {
-//			foreach ($extender::removeColumns() as $column) {
-//				/* @var Column $column */
-//				static::$columns = static::$columns->filter(function (Column $item, $key) use ($column) {
-//					return $item->name != $column->name;
-//				});
-//			}
-//		}
-//
-//		static::$columns = static::$columns->values();
 	}
 
 	/**
@@ -230,22 +214,6 @@ abstract class Grid
 				}
 			}
 		});
-
-
-//		foreach (static::$extenders[static::class] as $extender) {
-//			foreach ($extender::columns() as $column) {
-//				/* @var Column $column */
-//				if ($afterColumn = $column->before) {
-//					$index = static::$columns->search(function (Column $column, $key) use ($afterColumn) {
-//						return $column->name == $afterColumn;
-//					});
-//
-//					static::$columns->splice($index, 0, [$column]);
-//				} else {
-//					static::$columns->add($column);
-//				}
-//			}
-//		}
 	}
 
 

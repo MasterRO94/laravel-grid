@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace MasterRO\Grid\ServiceProviders;
 
+use Illuminate\Foundation\AliasLoader;
+use MasterRO\Grid\Html\GridHeadRender;
 use Illuminate\Support\ServiceProvider;
+use MasterRO\Grid\Facades\GridHeadRenderFacade;
 
 class GridServiceProvider extends ServiceProvider
 {
@@ -36,6 +39,9 @@ class GridServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		//
+		$this->app->singleton(GridHeadRender::class);
+
+		$loader = AliasLoader::getInstance();
+		$loader->alias('GridHeadRenderFacade', GridHeadRenderFacade::class);
 	}
 }
