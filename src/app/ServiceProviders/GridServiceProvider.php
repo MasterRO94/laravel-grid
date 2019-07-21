@@ -19,6 +19,8 @@ class GridServiceProvider extends ServiceProvider
 			__DIR__ . '/../../resources/config/grid.php' => config_path('grid.php'),
 		]);
 
+		$this->loadViewsFrom(__DIR__ . '/../../resources/views', 'grid');
+
 		$this->mergeConfigFrom(
 			__DIR__ . '/../../resources/config/grid.php', 'grid'
 		);
