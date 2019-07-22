@@ -9,6 +9,11 @@ use MasterRO\Grid\Html\GridHeadRender;
 use Illuminate\Support\ServiceProvider;
 use MasterRO\Grid\Facades\GridHeadRenderFacade;
 
+/**
+ * Class GridServiceProvider
+ *
+ * @package MasterRO\Grid\ServiceProviders
+ */
 class GridServiceProvider extends ServiceProvider
 {
 	/**

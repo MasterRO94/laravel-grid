@@ -7,6 +7,11 @@ namespace MasterRO\Grid\GridProviders;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Class DataTablesProvider
+ *
+ * @package MasterRO\Grid\GridProviders
+ */
 class DataTablesProvider extends Provider
 {
 	/**

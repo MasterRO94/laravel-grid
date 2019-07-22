@@ -14,6 +14,11 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
+/**
+ * Class Grid
+ *
+ * @package MasterRO\Grid\Core
+ */
 abstract class Grid
 {
 	/**

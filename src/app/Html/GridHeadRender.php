@@ -10,7 +10,7 @@ use MasterRO\Grid\Core\Factory as GridFactory;
 /**
  * Class GridHeadRender
  *
- * @package LenderKit\Admin\Services\Builders
+ * @package MasterRO\Grid\Html
  */
 class GridHeadRender
 {

@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Facade;
 use MasterRO\Grid\Html\GridHeadRender;
 
 /**
- * Class HeadBuilderFacade
+ * Class GridHeadRenderFacade
  *
- * @package LenderKit\Admin\Facades
+ * @package MasterRO\Grid\Facades
  */
 class GridHeadRenderFacade extends Facade
 {

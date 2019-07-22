@@ -1,5 +1,5 @@
 @php
-	/** @var \LenderKit\Admin\Services\Builders\Column $column*/
+	/** @var \MasterRO\Grid\Builders\Column$column*/
 @endphp
 
 <thead>

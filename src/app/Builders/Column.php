@@ -9,7 +9,7 @@ use LenderKit\Models\Model;
 /**
  * Class Column
  *
- * @package LenderKit\Admin\Services\Builders
+ * @package MasterRO\Grid\Builders
  */
 class Column
 {

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace MasterRO\Grid\Core;
 
 /**
- * Class ResourceExtender
+ * Class GridExtender
  *
- * @package LenderKit\Api\V1\Http\Resources
+ * @package MasterRO\Grid\Core
  */
 abstract class GridExtender
 {
