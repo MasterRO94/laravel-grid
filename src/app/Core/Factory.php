@@ -6,6 +6,11 @@ namespace MasterRO\Grid\Core;
 
 use Illuminate\Support\Str;
 
+/**
+ * Class Factory
+ *
+ * @package MasterRO\Grid\Core
+ */
 class Factory
 {
 	/**

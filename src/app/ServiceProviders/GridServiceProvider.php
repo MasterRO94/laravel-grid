@@ -4,8 +4,16 @@ declare(strict_types=1);
 
 namespace MasterRO\Grid\ServiceProviders;
 
+use Illuminate\Foundation\AliasLoader;
+use MasterRO\Grid\Html\GridHeadRender;
 use Illuminate\Support\ServiceProvider;
+use MasterRO\Grid\Facades\GridHeadRenderFacade;
 
+/**
+ * Class GridServiceProvider
+ *
+ * @package MasterRO\Grid\ServiceProviders
+ */
 class GridServiceProvider extends ServiceProvider
 {
 	/**
@@ -18,6 +26,8 @@ class GridServiceProvider extends ServiceProvider
 		$this->publishes([
 			__DIR__ . '/../../resources/config/grid.php' => config_path('grid.php'),
 		]);
+
+		$this->loadViewsFrom(__DIR__ . '/../../resources/views', 'grid');
 
 		$this->mergeConfigFrom(
 			__DIR__ . '/../../resources/config/grid.php', 'grid'
@@ -34,6 +44,9 @@ class GridServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		//
+		$this->app->singleton(GridHeadRender::class);
+
+		$loader = AliasLoader::getInstance();
+		$loader->alias('GridHeadRenderFacade', GridHeadRenderFacade::class);
 	}
 }

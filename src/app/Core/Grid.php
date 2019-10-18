@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace MasterRO\Grid\Core;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
+use MasterRO\Grid\Builders\Column;
 use MasterRO\Grid\GridProviders\Provider;
 use MasterRO\Grid\GridProviders\DataTablesProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
+/**
+ * Class Grid
+ *
+ * @package MasterRO\Grid\Core
+ */
 abstract class Grid
 {
 	/**
@@ -66,6 +71,27 @@ abstract class Grid
 		DataTablesProvider::class => 'data',
 	];
 
+	/**
+	 * Extenders
+	 *
+	 * @var
+	 */
+	protected static $extenders;
+
+	/**
+	 * Extender Instances
+	 *
+	 * @var Collection
+	 */
+	protected $extenderInstances;
+
+	/**
+	 * Columns
+	 *
+	 * @var Collection
+	 */
+	protected $columns;
+
 
 	/**
 	 * Grid constructor.
@@ -84,13 +110,53 @@ abstract class Grid
 		$this->requestData = $requestData->isEmpty() ? collect(request()->all()) : $requestData;
 		$this->provider = $this->provider ?? config('grid.provider', DataTablesProvider::class);
 		$this->setOptions();
+
+		$this->extenderInstances = collect();
+
+		$extenders = isset(static::$extenders[static::class]) ? static::$extenders[static::class] : [];
+
+		foreach ($extenders as $extender) {
+			$this->extenderInstances->add(app($extender));
+		}
+
+		$this->setColumns();
+	}
+
+	/**
+	 * Extend
+	 *
+	 * @param string $extender
+	 */
+	public static function extend(string $extender)
+	{
+		static::$extenders[static::class][] = $extender;
+	}
+
+	/**
+	 * Get Extenders
+	 *
+	 * @return Collection|GridExtender[]
+	 */
+	public function getExtenders(): Collection
+	{
+		return $this->extenderInstances;
 	}
 
 
 	/**
 	 * @return array
 	 */
-	abstract public static function columns(): array;
+	abstract public function initColumns(): void;
+
+	/**
+	 * Columns
+	 *
+	 * @return array
+	 */
+	public function columns(): array
+	{
+		return $this->columns ? $this->columns->toArray() : [];
+	}
 
 
 	/**
@@ -98,41 +164,97 @@ abstract class Grid
 	 *
 	 * @return mixed
 	 */
-	public static function column($index)
+	public function column($index)
 	{
 		$index = $index ?? -1;
 
-		return array_get(static::columns(), $index);
+		return array_get($this->columns(), $index);
+	}
+
+	/**
+	 * Set Columns
+	 */
+	public function setColumns(): void
+	{
+		$this->initColumns();
+
+		$this->addColumnsByExtender();
+
+		$this->removeColumnsByExtender();
+	}
+
+	/**
+	 * Remove Columns By Extender
+	 */
+	protected function removeColumnsByExtender(): void
+	{
+		$this->getExtenders()->map(function (GridExtender $extender) {
+			foreach ($extender->removeColumns() as $column) {
+				/* @var Column $column */
+				$this->columns = $this->columns->filter(function (Column $item, $key) use ($column) {
+					return $item->name != $column->name;
+				});
+			}
+		});
+
+		$this->columns = $this->columns->values();
+	}
+
+	/**
+	 * Add Columns By Extender
+	 */
+	protected function addColumnsByExtender(): void
+	{
+		$this->getExtenders()->map(function (GridExtender $extender) {
+			foreach ($extender->columns() as $column) {
+				/* @var Column $column */
+				if ($afterColumn = $column->before) {
+					$index = $this->columns->search(function (Column $column, $key) use ($afterColumn) {
+						return $column->name == $afterColumn;
+					});
+
+					$this->columns->splice($index, 0, [$column]);
+				} else {
+					$this->columns->add($column);
+				}
+			}
+		});
 	}
 
 
 	/**
+	 * Transform the results
+	 *
 	 * @param Collection $items
 	 *
 	 * @return Collection
 	 */
 	public function transform(Collection $items): Collection
 	{
-		if ($providerDataKey = Arr::get($this->iterableProviderKeys, $this->provider)) {
-			$entities = $items->get($providerDataKey);
+		$entities = $items->get('data');
 
-			return $items->put($providerDataKey, $entities->map(function ($entity) {
-				$columns = [];
-				foreach (static::columns() as $column) {
-					if (method_exists($this, $method = camel_case($column) . 'Column')) {
-						$columns[] = call_user_func([$this, $method], $entity);
-					} elseif ($entity->{$column} && $entity->{$column} instanceof Carbon) {
-						$columns[] = $entity->{$column}->toFormattedDateString();
-					} else {
-						$columns[] = $entity->{$column};
-					}
+		return $items->put('data', $entities->map(function (Model $entity) {
+			$columns = [];
+			foreach ($this->columns() as $column) {
+				$columnObject = $column;
+				/* @var Column $columnObject */
+				$column = $column instanceof Column ? $column->name : $column;
+
+				if ($columnObject instanceof Column && is_callable($columnObject->cellClosure)) {
+					$columns[] = $columnObject->renderCell($entity);
+				} elseif (method_exists($this, $method = camel_case($column) . 'Column')) {
+					$columns[] = call_user_func([$this, $method], $entity);
+				} elseif ($entity->{$column} && $entity->{$column} instanceof Carbon) {
+					$columns[] = $this->columnWithDateFromCarbon($entity->{$column});
+				} elseif ($entity->{$column} && $entity->{$column} instanceof Money) {
+					$columns[] = (string)$entity->{$column};
+				} else {
+					$columns[] = $entity->{$column};
 				}
+			}
 
-				return $columns;
-			})->values());
-		}
-
-		return $items;
+			return $columns;
+		})->values());
 	}
 
 

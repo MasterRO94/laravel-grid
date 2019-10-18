@@ -6,6 +6,11 @@ namespace MasterRO\Grid\GridProviders;
 
 use Illuminate\Support\Collection;
 
+/**
+ * Class Provider
+ *
+ * @package MasterRO\Grid\GridProviders
+ */
 abstract class Provider
 {
 	/**
