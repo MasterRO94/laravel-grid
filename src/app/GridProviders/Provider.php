@@ -13,13 +13,12 @@ abstract class Provider
 	 */
 	protected $requestData;
 
-
 	/**
 	 * Provider constructor.
 	 *
-	 * @param iterable $requestData
+	 * @param array $requestData
 	 */
-	public function __construct(iterable $requestData = [])
+	public function __construct($requestData = [])
 	{
 		$this->requestData = collect($requestData);
 	}

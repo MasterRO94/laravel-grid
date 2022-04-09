@@ -14,6 +14,11 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
+/**
+ * Class Grid
+ *
+ * @package MasterRO\Grid\Core
+ */
 abstract class Grid
 {
 	/**
@@ -66,32 +71,35 @@ abstract class Grid
 		DataTablesProvider::class => 'data',
 	];
 
-
 	/**
 	 * Grid constructor.
 	 *
-	 * @param QueryBuilder|EloquentBuilder|Relation|null $query
 	 * @param iterable $requestData
 	 *
 	 * @throws \Throwable
 	 */
-	public function __construct($query, iterable $requestData = [])
+	public function __construct(array $requestData = [])
 	{
 		$requestData = collect($requestData);
 
-		$this->query = $query;
-		$this->tableName = $query->getModel()->getTable();
+		$this->query = $this->query();
+		$this->tableName = $this->query->getModel()->getTable();
 		$this->requestData = $requestData->isEmpty() ? collect(request()->all()) : $requestData;
 		$this->provider = $this->provider ?? config('grid.provider', DataTablesProvider::class);
 		$this->setOptions();
 	}
-
 
 	/**
 	 * @return array
 	 */
 	abstract public static function columns(): array;
 
+	/**
+	 * Query
+	 *
+	 * @return EloquentBuilder
+	 */
+	abstract public function query();
 
 	/**
 	 * @param $index
@@ -102,9 +110,8 @@ abstract class Grid
 	{
 		$index = $index ?? -1;
 
-		return array_get(static::columns(), $index);
+		return Arr::get(static::columns(), $index);
 	}
-
 
 	/**
 	 * @param Collection $items
@@ -122,7 +129,9 @@ abstract class Grid
 					if (method_exists($this, $method = camel_case($column) . 'Column')) {
 						$columns[] = call_user_func([$this, $method], $entity);
 					} elseif ($entity->{$column} && $entity->{$column} instanceof Carbon) {
-						$columns[] = $entity->{$column}->toFormattedDateString();
+						$columns[] = method_exists($this, 'formatDate')
+							? $this->formatDate($entity->{$column})
+							: $entity->{$column}->toFormattedDateString();
 					} else {
 						$columns[] = $entity->{$column};
 					}
@@ -135,7 +144,6 @@ abstract class Grid
 		return $items;
 	}
 
-
 	/**
 	 * @param bool $withFilters
 	 *
@@ -147,7 +155,6 @@ abstract class Grid
 			? $this->applyFilters()->orderBy()->query
 			: $this->query;
 	}
-
 
 	/**
 	 * @return Collection
@@ -162,7 +169,6 @@ abstract class Grid
 		);
 	}
 
-
 	/**
 	 * Add query filters
 	 *
@@ -172,7 +178,6 @@ abstract class Grid
 	{
 		return $this;
 	}
-
 
 	/**
 	 * Add query ordering
@@ -186,7 +191,6 @@ abstract class Grid
 		return $this;
 	}
 
-
 	/**
 	 * @return Grid
 	 * @throws \Throwable
@@ -195,13 +199,12 @@ abstract class Grid
 	{
 		$options = $this->provider()->options();
 
-		$this->search = array_get($options, 'search');
-		$this->orderColumn = $this->column(array_get($options, 'orderColumn'));
-		$this->orderDirection = array_get($options, 'orderDirection');
+		$this->search = Arr::get($options, 'search');
+		$this->orderColumn = $this->column(Arr::get($options, 'orderColumn'));
+		$this->orderDirection = Arr::get($options, 'orderDirection');
 
 		return $this;
 	}
-
 
 	/**
 	 * @return \Illuminate\Foundation\Application|mixed

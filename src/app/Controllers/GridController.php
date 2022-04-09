@@ -8,6 +8,11 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
 use MasterRO\Grid\Core\Factory;
 
+/**
+ * Class GridController
+ *
+ * @package MasterRO\Grid\Controllers
+ */
 class GridController extends Controller
 {
 	/**
